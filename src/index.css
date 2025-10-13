@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+:root {
+  /* Brand palette */
+  --color-main: #49bbbc;            /* main colour */
+  --color-main-light: #92d6d5;      /* main light shade */
+  --color-orange: #f58c05;          /* secondary orange */
+  --color-green: #04cdb6;           /* green */
+  --color-purple: #5c5d9b;          /* purple */
+  --color-footer-dark: #252642;     /* dark purple for footer */
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+}
+
+/* Typography base */
+html, body {
+  font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--color-black);
+  background: var(--color-white);
+}
+
+h1 {
+  font-weight: 600; /* Poppins 600 main header */
+}
+
+h2, h3, h4, h5, h6 {
+  font-weight: 500; /* Poppins 500 headings */
+}
+
+p, li, span, small, label {
+  font-weight: 400; /* Poppins 400 paragraph */
+}
+
+/* Hero curved background utility */
+.hero-clip {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #29c3c1 0%, #1eb2a6 100%);
+  clip-path: ellipse(120% 70% at 70% 10%);
+  transform: translateY(100px);
+}
+
+/* New hero background and bottom curve (TOTC-style) */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(140deg, #29c3c1 0%, #1eb2a6 60%);
+}
+
+.hero-bottom-curve {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -16rem; /* deeper overlap to create stronger roundness */
+  height: 28rem;  /* taller, more rounded curve */
+  background: #ffffff;
+  /* Wider and taller ellipse anchored at the very top center to get a large rounded bottom */
+  clip-path: ellipse(200% 110% at 50% 0%);
+}
+
+/* Custom animations for TopBanner */
+@keyframes scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 20s linear infinite;
+}
+
+/* Hide scrollbar for horizontal scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Slow scrolling animation for LIGHTS UP text */
+@keyframes scroll-slow {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-slow {
+  animation: scroll-slow 30s linear infinite;
+}
+
+/* Infinite scroll animation for logo banner */
+@keyframes scroll-infinite {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-scroll-infinite {
+  animation: scroll-infinite 25s linear infinite;
+}
+
+/* Scrolling animation for ReadyToPlay banner */
+@keyframes scroll-infinite-banner {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-scroll-banner {
+  animation: scroll-infinite-banner 20s linear infinite;
+}
