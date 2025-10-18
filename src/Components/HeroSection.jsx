@@ -10,7 +10,7 @@ const HeroSection = () => {
       <div className="hero-bottom-curve" />
 
       {/* Header/Nav */}
-      <Navbar />
+      <Navbar variant="light" />
 
       {/* Main hero content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -60,7 +60,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="absolute left-1/2 -translate-x-1/2 -top-3 sm:-top-4 lg:left-auto lg:-translate-x-0 lg:-left-16 lg:top-4 bg-white text-gray-900 rounded-xl shadow-lg px-2.5 py-2 flex items-center gap-2 w-44 sm:w-48"
+              className="absolute left-1/2 -translate-x-1/2 -top-3 sm:-top-4 lg:-translate-x-0 lg:-left-16 lg:top-4 bg-white/80 backdrop-blur-md text-gray-900 rounded-xl border border-blue-400/30 shadow-lg shadow-blue-500/20 px-2.5 py-2 flex items-center gap-2 w-44 sm:w-48"
             >
               <img src="/img/Group.png" alt="Icon" className="h-8 w-8" />
               <div className="text-xs font-semibold leading-tight">
@@ -73,7 +73,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5, duration: 0.6 }}
-              className="absolute right-2 top-16 sm:right-4 sm:top-20 lg:right-0 lg:top-28 bg-white text-gray-900 rounded-xl shadow-lg p-3 w-60 sm:w-64"
+              className="absolute right-2 top-16 sm:right-4 sm:top-20 lg:right-0 lg:top-28 bg-white/80 backdrop-blur-md text-gray-900 rounded-xl border border-blue-400/30 shadow-lg shadow-blue-500/20 p-3 w-60 sm:w-64"
             >
               <div className="text-sm font-semibold">User Experience Class</div>
               <div className="text-xs text-gray-600 mt-1">Today at 12:00 PM</div>
@@ -87,7 +87,7 @@ const HeroSection = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.7, duration: 0.6 }}
-              className="absolute left-1/2 -translate-x-1/2 bottom-24 sm:bottom-28 lg:translate-x-0 lg:left-20 lg:bottom-40 bg-white text-gray-900 rounded-lg shadow-md px-3 py-2 flex items-center gap-2"
+              className="absolute left-1/2 -translate-x-1/2 bottom-24 sm:bottom-28 lg:translate-x-0 lg:left-20 lg:bottom-40 bg-white/80 backdrop-blur-md text-gray-900 rounded-lg border border-blue-400/30 shadow-md shadow-blue-500/20 px-3 py-2 flex items-center gap-2"
             >
               <img src="/img/Vector.png" alt="Check" className="h-5 w-5" />
               <span className="text-xs font-medium">Congratulations, your admission completed.</span>
