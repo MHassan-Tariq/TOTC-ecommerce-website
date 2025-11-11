@@ -4,102 +4,109 @@ import Navbar from "./Navbar.jsx";
 
 const HeroSection = () => {
   return (
-    <section className="relative bg-white text-gray-900 overflow-hidden rounded-b-[120px] lg:rounded-b-[200px]">
-      {/* TOTC-style teal background with white bottom curve */}
-      <div className="hero-bg" />
-      <div className="hero-bottom-curve" />
+    <section className="relative overflow-hidden bg-[#0b1f38] text-white">
+      {/* Gradient backdrop */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#103b55] via-[#0b5660] to-[#0b1f38]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.18),_transparent_60%)]" />
+      <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-[#081726] to-transparent" />
+
+      {/* Decorative accents */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -left-20 top-32 h-64 w-64 rounded-full bg-cyan-400/20 blur-3xl" />
+        <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+      </div>
 
       {/* Header/Nav */}
       <Navbar variant="light" />
 
       {/* Main hero content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-8 items-center pt-6 pb-12 lg:pt-10 lg:pb-20">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 lg:pt-20">
+        <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-12 items-center">
           {/* Left: Text */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="space-y-5 -mt-4 sm:-mt-6 lg:-mt-16 text-center lg:text-left"
+            className="space-y-8 text-center lg:text-left"
           >
-            <h1 className="text-white text-3xl sm:text-4xl lg:text-5xl font-black leading-tight">
-              <span className="text-[#f9a826] font-extrabold">Studying</span>
-              <span className="ml-2 font-black">Online is now much easier</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-sm font-medium text-white/90">
+              <span className="inline-flex h-2 w-2 rounded-full bg-emerald-300" />
+              Trusted by 250k+ lifelong learners
+            </div>
+
+            <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-[3.6rem] leading-tight font-bold">
+              Learn without limits and
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-cyan-200 to-white">
+                build your best career
+              </span>
             </h1>
-            <p className="text-white/90 max-w-sm mx-auto lg:mx-0 text-xs sm:text-sm font-medium">
-              TOTC is an interesting platform that will teach you in a more
-              interactive way.
+
+            <p className="text-white/80 text-sm sm:text-base max-w-xl mx-auto lg:mx-0">
+              Solinovation connects you with world-class mentors, personalized learning paths, and collaborative communities to accelerate your growth in tech, design, and business.
             </p>
 
-            <div className="flex items-center justify-center lg:justify-start gap-4 sm:gap-5 pt-3">
-              <button className="inline-flex items-center justify-center rounded-full bg-white text-gray-900 px-5 py-2 text-sm font-semibold shadow-md hover:bg-white/90 transition">
-                Join for free
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <button className="w-full sm:w-auto inline-flex items-center justify-center rounded-full bg-white text-[#0b1f38] px-6 py-3 text-sm font-semibold shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5 hover:shadow-xl transition">
+                Start Learning Today
               </button>
-              <a href="#" className="inline-flex items-center text-white font-medium hover:opacity-90">
-                <span className="mr-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              <a
+                href="#"
+                className="inline-flex items-center text-white/90 hover:text-white transition"
+              >
+                <span className="mr-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/15 border border-white/20">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
                 </span>
-                Watch how it works
+                Explore platform tour
               </a>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 sm:gap-4 pt-6 sm:pt-8">
+              {[
+                { value: "40+", label: "Interactive programs" },
+                { value: "250k", label: "Students worldwide" },
+                { value: "92%", label: "Career transition success" }
+              ].map(({ value, label }) => (
+                <div
+                  key={value}
+                  className="rounded-2xl bg-white/10 border border-white/15 backdrop-blur-sm px-4 py-3 text-left"
+                >
+                  <div className="text-lg sm:text-xl font-semibold text-white">{value}</div>
+                  <div className="text-xs sm:text-sm text-white/70 leading-snug">{label}</div>
+                </div>
+              ))}
             </div>
           </motion.div>
 
-          {/* Right: Student image + floating cards */}
-          <div className="relative">
-            <motion.img
-              initial={{ opacity: 0, scale: 0.98 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.7 }}
-              src="/img/h1.png"
-              alt="Student"
-              className="w-full max-w-md mx-auto drop-shadow-2xl transform scale-75 lg:scale-[0.7] -translate-y-3 sm:-translate-y-5 lg:-translate-y-6"
-            />
+          {/* Right: Visual */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7 }}
+            className="relative"
+          >
+            <div className="relative mx-auto w-full max-w-md">
+              <div className="absolute inset-0 rounded-[40px] bg-gradient-to-br from-cyan-300/20 via-emerald-300/10 to-transparent blur-2xl" />
 
-            {/* Card 1 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-              className="absolute left-1/2 -translate-x-1/2 -top-3 sm:-top-4 lg:-translate-x-0 lg:-left-16 lg:top-4 bg-white/80 backdrop-blur-md text-gray-900 rounded-xl border border-blue-400/30 shadow-lg shadow-blue-500/20 px-2.5 py-2 flex items-center gap-2 w-44 sm:w-48"
-            >
-              <img src="/img/Group.png" alt="Icon" className="h-8 w-8" />
-              <div className="text-xs font-semibold leading-tight">
-                250k Assisted Students
+              <div className="relative overflow-hidden rounded-[32px] border border-white/15 bg-white/5 backdrop-blur-xl shadow-2xl shadow-emerald-500/20">
+                <img
+                  src="/img/h1.png"
+                  alt="Learner hero"
+                  className="w-full object-cover"
+                />
+
+                <div className="absolute top-120 left-5 right-5 flex items-center justify-between rounded-2xl bg-white/10 backdrop-blur-lg border border-white/20 px-4 py-3 text-sm">
+                  <div>
+                    <p className="text-white font-semibold">Live Design Sprint</p>
+                    <p className="text-white/70 text-xs">Today • 12:00 PM – 1:30 PM</p>
+                  </div>
+                  <button className="inline-flex items-center rounded-full bg-emerald-400/90 px-3 py-1.5 text-xs font-semibold text-[#05202f] hover:bg-emerald-300 transition">
+                    Join session
+                  </button>
+                </div>
               </div>
-            </motion.div>
-
-            {/* Card 2 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-              className="absolute right-2 top-16 sm:right-4 sm:top-20 lg:right-0 lg:top-28 bg-white/80 backdrop-blur-md text-gray-900 rounded-xl border border-blue-400/30 shadow-lg shadow-blue-500/20 p-3 w-60 sm:w-64"
-            >
-              <div className="text-sm font-semibold">User Experience Class</div>
-              <div className="text-xs text-gray-600 mt-1">Today at 12:00 PM</div>
-              <button className="mt-3 inline-flex items-center rounded-full bg-rose-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-600 transition">
-                Join Now
-              </button>
-            </motion.div>
-
-            {/* Card 3 */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.7, duration: 0.6 }}
-              className="absolute left-1/2 -translate-x-1/2 bottom-24 sm:bottom-28 lg:translate-x-0 lg:left-20 lg:bottom-40 bg-white/80 backdrop-blur-md text-gray-900 rounded-lg border border-blue-400/30 shadow-md shadow-blue-500/20 px-3 py-2 flex items-center gap-2"
-            >
-              <img src="/img/Vector.png" alt="Check" className="h-5 w-5" />
-              <span className="text-xs font-medium">Congratulations, your admission completed.</span>
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
         </div>
-      </div>
-
-      {/* Background decorative circles */}
-      <div className="pointer-events-none absolute inset-0 z-0">
-        <div className="absolute right-10 top-24 w-40 h-40 rounded-full bg-white/20 blur-2xl" />
-        <div className="absolute left-10 bottom-10 w-28 h-28 rounded-full bg-white/20 blur-xl" />
       </div>
     </section>
   );

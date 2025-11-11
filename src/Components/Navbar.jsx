@@ -1,12 +1,20 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 
-const Navbar = ({ variant = "dark" }) => {
+const Navbar = ({ variant = "dark", transparentHover = false }) => {
+  const { isAuthenticated, user, logout } = useAuth();
   const linkBase = variant === "light" ? "text-white/90 hover:text-white" : "text-gray-800 hover:text-gray-900";
   const logoSrc = variant === "light" ? "/img/logo.png" : "/img/logoblack.png";
+  
+  const handleLogout = () => {
+    logout();
+  };
+
   return (
-    <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
-      <div className="flex items-center justify-between">
+    <div className={`relative z-30 ${transparentHover ? "bg-transparent hover:bg-white/20 hover:backdrop-blur-md transition-all duration-300" : ""}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="flex items-center justify-between">
         {/* Left: Logo */}
         <div className="flex items-center gap-3">
           <img src={logoSrc} alt="TOTC" className="h-12 w-auto" />
@@ -22,14 +30,31 @@ const Navbar = ({ variant = "dark" }) => {
           <a href="#" className={`transition-colors ${linkBase}`}>About Us</a>
         </nav>
 
-        {/* Right: Auth buttons */}
+        {/* Right: Auth buttons or User info */}
         <div className="flex items-center gap-3">
-          <Link to="/login" className="hidden sm:inline-flex items-center rounded-full border border-white/30 bg-white text-gray-900 px-5 py-2.5 text-sm font-semibold hover:bg-white/90 transition">
-            Login
-          </Link>
-          <Link to="/register" className="inline-flex items-center rounded-full bg-gradient-to-r from-[#29c3c1] to-[#1eb2a6] px-5 py-2.5 text-sm font-semibold shadow-lg hover:scale-[1.02] transition-transform">
-            Sign Up
-          </Link>
+          {isAuthenticated && user ? (
+            <div className="flex items-center gap-3">
+              <span className={`text-sm font-medium ${variant === "light" ? "text-white" : "text-gray-800"}`}>
+                Welcome, {user.name}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center rounded-full border border-red-300 bg-red-50 text-red-700 px-4 py-2 text-sm font-semibold hover:bg-red-100 transition"
+              >
+                Logout
+              </button>
+            </div>
+          ) : (
+            <>
+              <Link to="/login" className="hidden sm:inline-flex items-center rounded-full border border-white/30 bg-white text-gray-900 px-5 py-2.5 text-sm font-semibold hover:bg-white/90 transition">
+                Login
+              </Link>
+              <Link to="/register" className="inline-flex items-center rounded-full bg-gradient-to-r from-[#29c3c1] to-[#1eb2a6] px-5 py-2.5 text-sm font-semibold shadow-lg hover:scale-[1.02] transition-transform">
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
         </div>
       </div>
     </div>

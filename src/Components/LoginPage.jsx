@@ -1,8 +1,47 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { loginUser } from "../utils/api.js";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  // Handle form submission
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      // Call backend API
+      const response = await loginUser({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      // Store token and user data in context
+      if (response.token && response.user) {
+        login(response.user, response.token);
+        console.log("Login successful! User:", response.user.name);
+        
+        // Redirect to home page or dashboard
+        navigate("/");
+      }
+    } catch (err) {
+      setError(err.message || "Login failed. Please check your credentials.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <section className="min-h-screen w-full grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 px-4 sm:px-6 md:px-10 lg:px-16 py-6 md:py-10">
@@ -49,13 +88,23 @@ const LoginPage = () => {
             Lorem Ipsum is simply dummy text of the printing and typesetting industry.
           </p>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+
           {/* Form */}
-          <form className="space-y-4">
-            {/* Username */}
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            {/* Email */}
             <div>
               <input
-                type="text"
-                placeholder="Enter your User name"
+                type="email"
+                placeholder="Enter your Email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
                 className="w-full px-4 py-3 rounded-full border border-[#4DE0D9] text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4DE0D9]"
               />
             </div>
@@ -65,6 +114,9 @@ const LoginPage = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your Password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
                 className="w-full px-4 py-3 pr-11 rounded-full border border-[#4DE0D9] text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#4DE0D9]"
               />
               <button
@@ -83,15 +135,16 @@ const LoginPage = () => {
                 <input type="checkbox" className="h-4 w-4 rounded border-gray-300 text-[#23A7F1] focus:ring-[#23A7F1]" />
                 <span>Remember me</span>
               </label>
-              <a className="hover:text-[#4DE0D9] cursor-pointer">Forgot Password?</a>
+              <Link to="/forgot-password" className="hover:text-[#4DE0D9] cursor-pointer">Forgot Password?</Link>
             </div>
 
             {/* Login button */}
             <button
               type="submit"
-              className="w-full bg-[#49BBBD] text-white font-medium py-3 rounded-full mt-4 shadow-md hover:shadow-lg hover:brightness-110 hover:scale-105 transition-all duration-300"
+              disabled={loading}
+              className="w-full bg-[#49BBBD] text-white font-medium py-3 rounded-full mt-4 shadow-md hover:shadow-lg hover:brightness-110 hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Login
+              {loading ? "Logging in..." : "Login"}
             </button>
           </form>
         </div>

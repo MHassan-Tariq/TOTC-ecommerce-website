@@ -66,9 +66,9 @@ const CourseLanding = () => {
                       <h1 className="text-3xl font-bold text-gray-900">{profileData.name}</h1>
                       <p className="text-base text-gray-600 mt-2">{profileData.title}</p>
                     </div>
-                    <button className="bg-teal-500 hover:bg-teal-600 text-white px-8 py-3 rounded-lg font-medium text-sm shadow-md">
+                    <a href={`/course/${1}/calendar`} className="bg-teal-500 hover:bg-teal-600 text-white px-8 py-3 rounded-lg font-medium text-sm shadow-md">
                       Enroll Now
-                    </button>
+                    </a>
                   </div>
 
                   {/* Description */}
