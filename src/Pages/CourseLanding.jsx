@@ -1,181 +1,166 @@
-import React from 'react'
-import Navbar from '../Components/Navbar.jsx'
-
-const profileData = {
-  name: 'John Anderson',
-  title: 'Assistant Professor at Moncaster University',
-  description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud',
-  stats: [
-    { label: 'Modules', value: 43 },
-    { label: 'Students', value: 120 },
-    { label: 'Courses', value: 7 }
-  ]
-}
-
-const navTabs = ['About', 'Course', 'Notes', 'Project', 'Podcast', 'Book', 'Review']
-
-const bookData = [
-  { id: 1, cover: '/img/book1.jpg', title: 'All Benefits of PLUS', price: '$24' },
-  { id: 2, cover: '/img/book2.jpg', title: 'All Benefits of PLUS', price: '$24' },
-  { id: 3, cover: '/img/book3.jpg', title: 'All Benefits of PLUS', price: '$24' },
-  { id: 4, cover: '/img/book4.jpg', title: 'All Benefits of PLUS', price: '$24' },
-  { id: 5, cover: '/img/book5.png', title: 'All Benefits of PLUS', price: '$24' },
-  { id: 6, cover: '/img/book6.jpg', title: 'All Benefits of PLUS', price: '$24' }
-]
+import React, { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { Loader2, ArrowLeft, ShoppingCart } from "lucide-react";
+import Navbar from "../Components/Navbar.jsx";
+import FooterSection from "../Components/FooterSection.jsx";
+import { useCart } from "../context/CartContext.jsx";
+import { fetchCourse } from "../utils/api.js";
 
 const CourseLanding = () => {
+  const { id } = useParams();
+  const { addToCart, isInCart } = useCart();
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadCourse = async () => {
+      try {
+        const data = await fetchCourse(id);
+        setCourse(data.course);
+      } catch (err) {
+        setError(err.message || "Unable to load course");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCourse();
+  }, [id]);
+
+  const handleAddToCart = () => {
+    if (course) {
+      addToCart(course);
+    }
+  };
+
+  const title = course?.title || "Course details";
+  const description = course?.description || "Detailed course information will appear here once the course content loads.";
+  const instructor = course?.level ? `${course.level} level` : "";
+  const duration = course?.duration || "";
+  const formatDuration = (value) => {
+    if (!value) return "";
+    const match = value.toString().match(/(\d+(?:\.\d+)?)/);
+    if (!match) return value;
+    return `Weeks ${match[1]}`;
+  };
+  const learningList = Array.isArray(course?.whatYoullLearn) ? course.whatYoullLearn : [];
+  const requirementsList = Array.isArray(course?.requirements) ? course.requirements : [];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top Navigation */}
-      <div className="bg-white shadow-sm">
-        <Navbar />
-      </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <Navbar />
+      <main className="flex-1">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <Link
+            to="/courses"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back to courses
+          </Link>
 
-      {/* Main Content Container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Main White Card Container */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          
-          {/* Profile Banner Section */}
-          <div className="relative">
-            {/* Background Image - Top Section */}
-            <div className="relative h-32 bg-gray-100">
-              <img
-                src="/img/h4.jpg"
-                alt="banner"
-                className="absolute inset-0 w-full h-full object-cover opacity-50"
-              />
+          {loading ? (
+            <div className="flex justify-center items-center py-24">
+              <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
             </div>
+          ) : error ? (
+            <div className="mt-10 rounded-3xl border border-red-200 bg-red-50 px-6 py-10 text-center text-red-600">
+              {error}
+            </div>
+          ) : (
+            <div className="mt-8 bg-white rounded-3xl shadow-lg overflow-hidden">
+              <div className="relative h-56 bg-gray-100">
+                {course?.imageUrl ? (
+                  <img src={course.imageUrl} alt={title} className="absolute inset-0 w-full h-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
+                    Course preview
+                  </div>
+                )}
+              </div>
 
-            {/* Profile Content */}
-            <div className="px-8 py-8">
-              <div className="flex items-start gap-8">
-                {/* Profile Photo - Position lower (no overlap) */}
-                <div className="mt-6 md:mt-8 flex-shrink-0">
-                  <img
-                    src="/img/profilephoto.png"
-                    alt="Profile"
-                    className="w-28 h-28 rounded-full object-cover ring-4 ring-white shadow-lg"
-                  />
+              <div className="px-8 py-10 space-y-10">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+                  <div className="space-y-4 max-w-3xl">
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900">{title}</h1>
+                    <p className="text-gray-600 leading-relaxed">{description}</p>
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                      {instructor && <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-emerald-700 font-medium">{instructor}</span>}
+                      {course?.category && (
+                        <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-blue-700 font-medium">
+                          {course.category}
+                        </span>
+                      )}
+                      {duration && <span>Duration: {formatDuration(duration)}</span>}
+                      {course?.price !== undefined && course?.price !== null && (
+                        <span className="text-emerald-600 font-semibold">
+                          ${Number(course.price).toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <button
+                      onClick={handleAddToCart}
+                      disabled={isInCart(course._id)}
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      <ShoppingCart className="h-4 w-4" />
+                      {isInCart(course._id) ? 'In cart' : 'Add to cart'}
+                    </button>
+                  </div>
                 </div>
 
-                {/* User Details */}
-                <div className="flex-1 pt-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h1 className="text-3xl font-bold text-gray-900">{profileData.name}</h1>
-                      <p className="text-base text-gray-600 mt-2">{profileData.title}</p>
+                {course?.videoUrl && (
+                  <div className="space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-900">Intro video</h2>
+                    <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-black">
+                      <video src={course.videoUrl} className="w-full aspect-video object-cover" controls />
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/60 to-transparent" />
                     </div>
-                    <a href={`/course/${1}/calendar`} className="bg-teal-500 hover:bg-teal-600 text-white px-8 py-3 rounded-lg font-medium text-sm shadow-md">
-                      Enroll Now
-                    </a>
                   </div>
+                )}
 
-                  {/* Description */}
-                  <p className="mt-6 text-base text-gray-600 leading-relaxed max-w-4xl">
-                    {profileData.description}
-                  </p>
-
-                  {/* Stats Bar */}
-                  <div className="mt-8 flex items-center gap-8">
-                    {profileData.stats.map((stat, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        {i > 0 && <div className="w-px h-6 bg-gray-300" />}
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-teal-500" />
-                          <span className="text-base font-semibold text-gray-800">{stat.value}</span>
-                          <span className="text-base text-gray-500">{stat.label}</span>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {/* Decorative Dots */}
-                    <div className="ml-auto flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-teal-300" />
-                      <div className="w-2 h-2 rounded-full bg-teal-400" />
-                      <div className="w-2 h-2 rounded-full bg-teal-500" />
-                    </div>
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">What you'll learn</h3>
+                    {learningList.length > 0 ? (
+                      <ul className="list-disc list-inside text-sm text-gray-600 leading-relaxed space-y-1">
+                        {learningList.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        This course equips you with practical skills and real-world assignments tailored to build confidence and deliver measurable results.
+                      </p>
+                    )}
+                  </div>
+                  <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Requirements</h3>
+                    {requirementsList.length > 0 ? (
+                      <ul className="list-disc list-inside text-sm text-gray-600 leading-relaxed space-y-1">
+                        {requirementsList.map((item, idx) => (
+                          <li key={idx}>{item}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        Basic familiarity with the subject matter helps, but the lessons are designed to guide you from foundational concepts to applied techniques without assuming prior expertise.
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Navigation Tabs */}
-          <div className="px-8 pb-6">
-            <div className="flex gap-4 overflow-x-auto">
-              {navTabs.map((tab) => (
-                <button
-                  key={tab}
-                  className={`px-6 py-3 text-sm rounded-lg border whitespace-nowrap transition-colors ${
-                    tab === 'Book' 
-                      ? 'bg-teal-500 text-white border-teal-500 shadow-md' 
-                      : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Book Recommendation Grid */}
-          <div className="px-8 pb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-8">Literature course</h2>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
-              {bookData.map((book) => (
-                <div key={book.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100">
-                  <div className="aspect-[3/4] w-full bg-gray-100">
-                    <img
-                      src={book.cover}
-                      alt={book.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-6">
-                    <div className="text-center">
-                      <h3 className="text-base font-bold text-gray-800 mb-2">{book.title}</h3>
-                      <p className="text-lg font-bold text-teal-500">{book.price}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Pagination */}
-            <div className="mt-12 flex items-center justify-center gap-3">
-              <button className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              {[1, 2, 3, 4].map((n) => (
-                <button
-                  key={n}
-                  className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium ${
-                    n === 1 
-                      ? 'bg-teal-500 text-white' 
-                      : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  {n}
-                </button>
-              ))}
-              <span className="text-gray-400">...</span>
-              <button className="w-10 h-10 flex items-center justify-center rounded-lg bg-teal-500 text-white hover:bg-teal-600">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-          </div>
+          )}
         </div>
-      </div>
+      </main>
+      <FooterSection />
     </div>
-  )
-}
+  );
+};
 
-export default CourseLanding
+export default CourseLanding;
 
 

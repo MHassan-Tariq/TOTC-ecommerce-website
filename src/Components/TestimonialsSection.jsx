@@ -28,12 +28,12 @@ const TestimonialsSection = () => {
 
             {/* Right: testimonial content */}
             <div className="md:col-span-3">
-              <h3 className="text-base md:text-lg font-semibold text-[#1C1C1C]">Savannah Nguyen</h3>
-              <p className="text-xs md:text-sm text-gray-500">tanya.hill@example.com</p>
+              <h3 className="text-base md:text-lg font-semibold text-[#1C1C1C]">Hassan Tariq</h3>
+              <p className="text-xs md:text-sm text-gray-500">hassanit1192@gmail.com</p>
 
               <div className="mt-4 space-y-2 text-xs md:text-sm text-[#6B7280]">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, consectetur adipiscing elit, sed do eiusmod tempor</p>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor, sed do eiusmod tempor</p>
+                <p>TOTC gave me a clear roadmap for building modern digital products. The structured lessons and hands-on projects made it easy to translate ideas into production-ready solutions.</p>
+                <p>The mentors were responsive, the community was motivating, and every module helped me level up faster than learning on my own.</p>
               </div>
 
               {/* Social icons */}

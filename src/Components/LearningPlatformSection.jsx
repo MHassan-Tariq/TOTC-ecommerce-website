@@ -63,89 +63,11 @@ const HeroLearningSection = () => {
   );
 };
 
-const RecommendedCourses = () => {
-  const courses = Array.from({ length: 4 }).map((_, i) => ({
-    id: i + 1,
-    img: [
-      "/img/h4.jpg", // student with laptop
-      "/img/h5.jpg", // hands on keyboard
-      "/img/b3.jpg", // laptop screen
-      "/img/h4.jpg", // workspace
-    ][i % 4],
-    title: "AWS Certified Solutions Architect",
-    category: "Design",
-    duration: "3 Month",
-    desc:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-    instructor: { name: "Lina", avatar: "/img/profilephoto.png" },
-    priceOld: "$100",
-    priceNew: "$80",
-  }));
-
-  return (
-    <div className="mt-10 md:mt-12">
-      <div className="mb-6 flex items-center justify-between">
-        <h3 className="text-lg md:text-2xl font-bold text-[#1E2B4A]">
-          Recommended for you
-        </h3>
-        <Link to="/courses" className="text-sky-500 text-sm hover:underline">
-          See all
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {courses.map((c) => (
-          <article
-            key={c.id}
-            className="group flex h-full flex-col overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl"
-          >
-            <img src={c.img} alt={c.title} className="h-44 w-full object-cover" />
-
-            <div className="flex grow flex-col px-5 pb-5 pt-4">
-              <div className="mb-3 flex items-center justify-between text-xs text-gray-500">
-                <span className="flex items-center gap-1">
-                  <img src="/img/Group.png" alt="" className="h-3 w-3" />
-                  {c.category}
-                </span>
-                <span className="flex items-center gap-1">
-                  <img src="/img/calander.png" alt="" className="h-3 w-3" />
-                  {c.duration}
-                </span>
-              </div>
-
-              <h4 className="text-[15px] md:text-base font-semibold text-[#1E2B4A]">
-                {c.title}
-              </h4>
-              <p className="mt-2 line-clamp-2 text-sm text-gray-600">{c.desc}</p>
-
-              <div className="mt-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <img
-                    src={c.instructor.avatar}
-                    alt={c.instructor.name}
-                    className="h-6 w-6 rounded-full object-cover"
-                  />
-                  <span className="text-sm text-gray-700">{c.instructor.name}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-400 line-through">{c.priceOld}</span>
-                  <span className="font-semibold text-emerald-500">{c.priceNew}</span>
-                </div>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 const LearningPlatformSection = () => {
   return (
     <section className="w-full bg-[#EAF3FF]">
       <div className="mx-auto max-w-7xl px-6 py-10 md:py-12 lg:py-14">
         <HeroLearningSection />
-        <RecommendedCourses />
       </div>
     </section>
   );

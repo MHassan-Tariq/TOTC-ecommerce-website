@@ -60,10 +60,10 @@ async function apiRequest(endpoint, method = 'GET', data = null, token = null) {
     if (error instanceof TypeError && error.message === 'Failed to fetch') {
       console.error('❌ Network Error:', error);
       console.error('💡 Make sure:');
-      console.error('   1. Backend is running on http://localhost:3000');
+      console.error('   1. Backend is running on http://localhost:9880');
       console.error('   2. Vite dev server is running');
       console.error('   3. No firewall blocking the connection');
-      throw new Error('Cannot connect to server. Make sure the backend is running on http://localhost:3000');
+      throw new Error('Cannot connect to server. Make sure the backend is running on http://localhost:9880');
     }
     // Re-throw other errors with their messages
     console.error('❌ API Error:', error);
@@ -107,6 +107,78 @@ export const verifyOTP = async (email, otp) => {
 // Step 3: Reset Password
 export const resetPassword = async (email, resetToken, newPassword) => {
   return apiRequest('/auth/reset-password', 'POST', { email, resetToken, newPassword });
+};
+
+// Courses
+export const fetchCourses = async () => {
+  return apiRequest('/courses', 'GET');
+};
+
+export const fetchCourse = async (id) => {
+  return apiRequest(`/courses/${id}`, 'GET');
+};
+
+export const createCheckoutSession = async (items, token, customerEmail) => {
+  return apiRequest(
+    '/payments/create-checkout-session',
+    'POST',
+    { items, customerEmail },
+    token
+  );
+};
+
+// Blogs
+export const fetchBlogs = async () => {
+  return apiRequest('/blogs', 'GET');
+};
+
+export const fetchBlog = async (id) => {
+  return apiRequest(`/blogs/${id}`, 'GET');
+};
+
+export const fetchBlogBySlug = async (slug) => {
+  return apiRequest(`/blogs/slug/${slug}`, 'GET');
+};
+
+export const createBlog = async (blogData, token) => {
+  return apiRequest('/blogs', 'POST', blogData, token);
+};
+
+export const updateBlog = async (id, blogData, token) => {
+  return apiRequest(`/blogs/${id}`, 'PUT', blogData, token);
+};
+
+export const deleteBlog = async (id, token) => {
+  return apiRequest(`/blogs/${id}`, 'DELETE', null, token);
+};
+
+export const uploadBlogImage = async (file, token) => {
+  const endpoint = `${API_BASE_URL}/blogs/upload`;
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const headers = {};
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.json().catch(() => ({}));
+      throw new Error(errorBody.message || 'Failed to upload image');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Blog image upload failed:', error);
+    throw error;
+  }
 };
 
 // Token storage helpers (using localStorage)

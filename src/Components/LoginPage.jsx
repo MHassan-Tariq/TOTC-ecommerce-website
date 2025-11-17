@@ -33,8 +33,8 @@ const LoginPage = () => {
         login(response.user, response.token);
         console.log("Login successful! User:", response.user.name);
         
-        // Redirect to home page or dashboard
-        navigate("/");
+        // Redirect based on role
+        navigate(response.user.role === "admin" ? "/admin" : "/");
       }
     } catch (err) {
       setError(err.message || "Login failed. Please check your credentials.");

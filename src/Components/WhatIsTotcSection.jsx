@@ -1,7 +1,103 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { fetchCourses } from "../utils/api.js";
+
+const FALLBACK_INSTRUCTOR_IMAGE = "/img/h4.jpg";
+const FALLBACK_STUDENT_IMAGE = "/img/h5.jpg";
+
+const truncateText = (text, limit = 28) => {
+  if (!text || typeof text !== "string") return "";
+  return text.length > limit ? `${text.slice(0, limit).trim()}…` : text;
+};
+
+const MotionLink = motion(Link);
 
 const WhatIsTotcSection = () => {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadCourses = async () => {
+      try {
+        const response = await fetchCourses();
+        const courseList = Array.isArray(response?.courses)
+          ? response.courses
+          : Array.isArray(response)
+            ? response
+            : [];
+
+        if (isMounted) {
+          setCourses(courseList);
+        }
+      } catch (error) {
+        console.error("Failed to load courses for WhatIsTotc section", error);
+        if (isMounted) {
+          setCourses([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadCourses();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const highlightCards = useMemo(() => {
+    const baseCards = [
+      {
+        key: "instructors",
+        defaultLabel: "FOR INSTRUCTORS",
+        defaultCta: "Start a class today",
+        fallbackImage: FALLBACK_INSTRUCTOR_IMAGE,
+        fallbackLink: "/admin/courses",
+      },
+      {
+        key: "students",
+        defaultLabel: "FOR STUDENTS",
+        defaultCta: "Enter access code",
+        fallbackImage: FALLBACK_STUDENT_IMAGE,
+        fallbackLink: "/courses",
+      },
+    ];
+
+    if (!courses.length) {
+      return baseCards.map((card) => ({
+        ...card,
+        image: card.fallbackImage,
+        label: card.defaultLabel,
+        cta: card.defaultCta,
+        link: card.fallbackLink,
+      }));
+    }
+
+    return baseCards.map((card, index) => {
+      const course = courses[index] || courses[0];
+      const resolvedImage = course?.imageUrl || course?.videoUrl || card.fallbackImage;
+
+      const labelSource = course?.category?.trim() || card.defaultLabel;
+      const ctaSource = course?.title?.trim() || card.defaultCta;
+
+      return {
+        ...card,
+        image: resolvedImage,
+        label: (card.key === "instructors" && labelSource === card.defaultLabel)
+          ? card.defaultLabel
+          : labelSource.toUpperCase(),
+        cta: truncateText(ctaSource, 32) || card.defaultCta,
+        link: course?._id ? `/course/${course._id}` : card.fallbackLink,
+      };
+    });
+  }, [courses]);
+
   return (
     <section className="w-full bg-white py-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,55 +125,42 @@ const WhatIsTotcSection = () => {
 
         {/* Middle: Instructor / Student Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
-          {/* Instructor Card */}
-          <motion.a
-            href="#"
-            initial={{ opacity: 0, scale: 0.98 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.5 }}
-            className="relative rounded-2xl overflow-hidden group block h-[340px] md:h-[380px]"
-          >
-            <img
-              src="/img/h4.jpg"
-              alt="For instructors"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="relative z-10 flex flex-col items-center justify-center text-center h-full py-0">
-              <div className="text-white text-lg font-semibold tracking-wide">
-                FOR INSTRUCTORS
+          {highlightCards.map((card, index) => (
+            <MotionLink
+              key={card.key}
+              to={card.link}
+              initial={{ opacity: 0, scale: 0.98 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5, delay: index * 0.05 }}
+              className="relative rounded-2xl overflow-hidden group block h-[340px] md:h-[380px]"
+            >
+              <img
+                src={card.image}
+                alt={card.label}
+                className={`absolute inset-0 h-full w-full object-cover ${loading ? "opacity-80" : ""}`}
+                onError={(event) => {
+                  event.currentTarget.src =
+                    card.key === "instructors" ? FALLBACK_INSTRUCTOR_IMAGE : FALLBACK_STUDENT_IMAGE;
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="relative z-10 flex flex-col items-center justify-center text-center h-full py-0">
+                <div className="text-white text-lg font-semibold tracking-wide">
+                  {card.label}
+                </div>
+                <div
+                  className={`mt-3 rounded-full px-5 py-2 text-sm font-medium shadow-md group-hover:scale-105 transition-all duration-500 ${
+                    card.key === "students"
+                      ? "bg-teal-500 text-white hover:bg-teal-600"
+                      : "bg-white/80 text-gray-800"
+                  }`}
+                >
+                  {card.cta}
+                </div>
               </div>
-              <div className="mt-3 rounded-full bg-white/80 text-gray-800 px-5 py-2 text-sm font-medium shadow-md group-hover:scale-105 transition-transform duration-500">
-                Start a class today
-              </div>
-            </div>
-          </motion.a>
-
-          {/* Student Card */}
-          <motion.a
-            href="#"
-            initial={{ opacity: 0, scale: 0.98 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.5, delay: 0.05 }}
-            className="relative rounded-2xl overflow-hidden group block h-[340px] md:h-[380px]"
-          >
-            <img
-              src="/img/h5.jpg"
-              alt="For students"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="relative z-10 flex flex-col items-center justify-center text-center h-full py-0">
-              <div className="text-white text-lg font-semibold tracking-wide">
-                FOR STUDENTS
-              </div>
-              <div className="mt-3 rounded-full bg-teal-500 text-white px-5 py-2 text-sm font-medium shadow-md hover:bg-teal-600 group-hover:scale-105 transition-all duration-500">
-                Enter access code
-              </div>
-            </div>
-          </motion.a>
+            </MotionLink>
+          ))}
         </div>
 
         {/* Bottom: Classroom Feature */}

@@ -11,6 +11,7 @@ const LoginRegisterPage = () => {
     name: "",
     email: "",
     password: "",
+    role: "student",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -36,7 +37,7 @@ const LoginRegisterPage = () => {
         if (response.token && response.user) {
           login(response.user, response.token);
           setSuccess("Login successful! Redirecting...");
-          setTimeout(() => navigate("/"), 1000);
+          setTimeout(() => navigate(response.user.role === "admin" ? "/admin" : "/"), 1000);
         }
       } else {
         // Register logic
@@ -44,11 +45,12 @@ const LoginRegisterPage = () => {
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          role: formData.role,
         });
 
         setSuccess("Registration successful! Please login.");
         // Reset form
-        setFormData({ name: "", email: "", password: "" });
+        setFormData({ name: "", email: "", password: "", role: "student" });
         // Switch to login mode after 2 seconds
         setTimeout(() => setIsLogin(true), 2000);
       }
@@ -130,6 +132,21 @@ const LoginRegisterPage = () => {
                 required={!isLogin}
                 className="w-full px-4 py-3 mb-4 border border-[#49BBBD] rounded-full text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#49BBBD]"
               />
+            )}
+
+            {/* Role selection - only for register */}
+            {!isLogin && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-600 mb-2">Register as</label>
+                <select
+                  value={formData.role}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                  className="w-full px-4 py-3 border border-[#49BBBD] rounded-full text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-[#49BBBD]"
+                >
+                  <option value="student">Student</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
             )}
 
             {/* Email */}

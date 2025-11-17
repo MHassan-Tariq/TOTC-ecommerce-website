@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { FileSpreadsheet, CalendarClock, UsersRound } from "lucide-react";
 
 const stats = [
   { value: "15K+", label: "Students" },
@@ -11,25 +12,28 @@ const stats = [
 
 const cards = [
   {
-    icon: "/img/invoice.png",
+    icon: FileSpreadsheet,
+    iconTone: "text-blue-600",
     title: "Online Billing, Invoicing, & Contracts",
     text:
       "Simple and secure control of your organization’s financial and legal transactions. Send customized invoices and contracts.",
-    badge: "bg-blue-100",
+    badge: "bg-blue-100/70",
   },
   {
-    icon: "/img/calendar.png",
+    icon: CalendarClock,
+    iconTone: "text-emerald-600",
     title: "Easy Scheduling & Attendance Tracking",
     text:
       "Schedule and reserve classrooms at one campus or multiple campuses. Keep detailed records of student attendance.",
-    badge: "bg-green-100",
+    badge: "bg-green-100/70",
   },
   {
-    icon: "/img/users.png",
+    icon: UsersRound,
+    iconTone: "text-rose-600",
     title: "Customer Tracking",
     text:
       "Automate and track emails to individuals or groups. Skilline’s built-in system helps organize your organization.",
-    badge: "bg-rose-100",
+    badge: "bg-rose-100/70",
   },
 ];
 
@@ -41,9 +45,7 @@ const SuccessSection = () => {
         <div className="text-center">
           <h2 className="text-2xl md:text-3xl font-bold text-black">Our Success</h2>
           <p className="text-gray-500 max-w-xl mx-auto mt-2 text-sm md:text-base">
-            Ornare id fames interdum porttitor nulla turpis etiam. Diam vitae
-            sollicitudin at nec nam et pharetra gravida. Adipiscing a quis
-            ultrices eu ornare tristique vel nisl orci.
+            From first enrollment to thriving alumni, TOTC learners keep exceeding expectations. Our platform powers real growth with measurable outcomes across every program we offer.
           </p>
         </div>
 
@@ -73,7 +75,9 @@ const SuccessSection = () => {
 
         {/* Cards */}
         <div className="mt-12 grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {cards.map((c, idx) => (
+          {cards.map((c, idx) => {
+            const Icon = c.icon;
+            return (
             <motion.div
               key={c.title}
               initial={{ opacity: 0, y: 20 }}
@@ -83,7 +87,7 @@ const SuccessSection = () => {
               className="bg-white rounded-2xl p-10 md:p-12 text-center shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-300 min-h-[360px] md:min-h-[400px]"
             >
               <div className={`mx-auto h-14 w-14 rounded-full ${c.badge} grid place-items-center`}>
-                <img src={c.icon} alt="icon" className="h-7 w-7 object-contain" />
+                <Icon className={`h-7 w-7 ${c.iconTone}`} strokeWidth={1.75} />
               </div>
               <h4 className="text-[#2e3a59] text-lg font-semibold mt-4 mb-2">
                 {c.title}
@@ -92,7 +96,7 @@ const SuccessSection = () => {
                 {c.text}
               </p>
             </motion.div>
-          ))}
+          );})}
         </div>
       </div>
     </section>

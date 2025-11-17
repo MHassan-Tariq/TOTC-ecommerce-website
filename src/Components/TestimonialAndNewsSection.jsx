@@ -1,4 +1,6 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { fetchBlogs } from "../utils/api.js";
 
 const Star = () => (
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
@@ -12,7 +14,76 @@ const ArrowRight = () => (
   </svg>
 );
 
+const FALLBACK_MAIN_IMAGE = "/img/h4.jpg";
+const FALLBACK_SECONDARY_IMAGE = "/img/h10.png";
+
+const createExcerpt = (blog) => {
+  if (!blog) return "";
+  if (blog.excerpt) return blog.excerpt;
+
+  if (blog.content) {
+    const stripped = blog.content.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+    if (stripped.length > 140) {
+      return `${stripped.slice(0, 140).trim()}…`;
+    }
+    return stripped;
+  }
+
+  return "";
+};
+
 const TestimonialAndNewsSection = () => {
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadBlogs = async () => {
+      try {
+        const result = await fetchBlogs();
+        const blogList = Array.isArray(result?.blogs)
+          ? result.blogs
+          : Array.isArray(result)
+            ? result
+            : [];
+
+        if (isMounted) {
+          setBlogs(blogList);
+        }
+      } catch (error) {
+        console.error("Failed to load blogs for news section", error);
+        if (isMounted) {
+          setBlogs([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadBlogs();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const { featureBlog, secondaryBlogs } = useMemo(() => {
+    if (!blogs.length) {
+      return {
+        featureBlog: null,
+        secondaryBlogs: [],
+      };
+    }
+
+    return {
+      featureBlog: blogs[0],
+      secondaryBlogs: blogs.slice(1, 4),
+    };
+  }, [blogs]);
+
   return (
     <section className="bg-white py-24">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
@@ -70,77 +141,156 @@ const TestimonialAndNewsSection = () => {
           {/* Complex grid: big left card, stacked list on right */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
             {/* Big left card */}
-            <article className="bg-white rounded-2xl overflow-hidden shadow hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
-              <div className="relative">
-                <img src="/img/h4.jpg" alt="news 1" className="w-full h-64 object-cover" />
-                <span className="absolute left-4 bottom-4 inline-block px-3 py-1 text-xs font-semibold rounded-full text-white bg-gradient-to-r from-[#00B2FF] to-[#0078FF]">NEWS</span>
-              </div>
-              <div className="p-6">
-                <h4 className="text-lg font-semibold text-gray-800 mt-4 hover:text-[#00B2FF] cursor-pointer">
-                  Class adds $30 million to its balance sheet for a Zoom-friendly edtech solution
-                </h4>
-                <p className="text-gray-500 text-sm mt-2 leading-relaxed">
-                  Class, launched less than a year ago by Blackboard co-founder Michael Chasen, integrates seamlessly.
-                </p>
-                <a href="#" className="text-[#00B2FF] font-medium mt-4 inline-block hover:underline">Read more</a>
-              </div>
-            </article>
+            {loading ? (
+              <article className="bg-white rounded-2xl overflow-hidden shadow transition-all duration-300">
+                <div className="relative">
+                  <div className="w-full h-64 bg-gray-200 animate-pulse" />
+                  <span className="absolute left-4 bottom-4 inline-block px-3 py-1 text-xs font-semibold rounded-full text-white bg-gradient-to-r from-[#00B2FF] to-[#0078FF]">
+                    Loading
+                  </span>
+                </div>
+                <div className="p-6 space-y-3">
+                  <div className="h-5 w-3/4 bg-gray-200 rounded-full animate-pulse" />
+                  <div className="h-3 w-full bg-gray-200 rounded-full animate-pulse" />
+                  <div className="h-3 w-5/6 bg-gray-200 rounded-full animate-pulse" />
+                </div>
+              </article>
+            ) : featureBlog ? (
+              <article className="bg-white rounded-2xl overflow-hidden shadow hover:shadow-lg hover:scale-[1.02] transition-all duration-300">
+                <div className="relative">
+                  <img
+                    src={featureBlog.coverImage || featureBlog.categoryImage || FALLBACK_MAIN_IMAGE}
+                    alt={featureBlog.title}
+                    className="w-full h-64 object-cover"
+                    onError={(event) => {
+                      event.currentTarget.src = FALLBACK_MAIN_IMAGE;
+                    }}
+                  />
+                  <span className="absolute left-4 bottom-4 inline-block px-3 py-1 text-xs font-semibold rounded-full text-white bg-gradient-to-r from-[#00B2FF] to-[#0078FF]">
+                    {(featureBlog.category || "News").toUpperCase()}
+                  </span>
+                </div>
+                <div className="p-6">
+                  <h4 className="text-lg font-semibold text-gray-800 mt-4 hover:text-[#00B2FF] cursor-pointer">
+                    {featureBlog.title}
+                  </h4>
+                  <p className="text-gray-500 text-sm mt-2 leading-relaxed">
+                    {createExcerpt(featureBlog) || "Explore the latest stories, insights, and updates from our community of learners and educators."}
+                  </p>
+                  <Link
+                    to={featureBlog.slug ? `/blog/${featureBlog.slug}` : `/blog/${featureBlog._id}`}
+                    className="text-[#00B2FF] font-medium mt-4 inline-block hover:underline"
+                  >
+                    Read more
+                  </Link>
+                </div>
+              </article>
+            ) : (
+              <article className="bg-white rounded-2xl overflow-hidden shadow transition-all duration-300">
+                <div className="relative">
+                  <img src={FALLBACK_MAIN_IMAGE} alt="Blog placeholder" className="w-full h-64 object-cover" />
+                  <span className="absolute left-4 bottom-4 inline-block px-3 py-1 text-xs font-semibold rounded-full text-white bg-gradient-to-r from-[#00B2FF] to-[#0078FF]">
+                    NEWS
+                  </span>
+                </div>
+                <div className="p-6">
+                  <h4 className="text-lg font-semibold text-gray-800 mt-4">
+                    Fresh insights are on their way
+                  </h4>
+                  <p className="text-gray-500 text-sm mt-2 leading-relaxed">
+                    Publish a blog post from the admin panel to showcase it here automatically.
+                  </p>
+                  <span className="text-[#00B2FF] font-medium mt-4 inline-block">
+                    Read more
+                  </span>
+                </div>
+              </article>
+            )}
 
             {/* Right stacked cards */}
             <div className="grid grid-cols-1 gap-6">
-              {/* Small card A */}
-              <article className="bg-white rounded-2xl overflow-hidden shadow hover:shadow-lg transition-all duration-300">
-                <div className="flex gap-4 p-6">
-                  <div className="relative">
-                    <img src="/img/h10.png" alt="news 2" className="w-32 h-24 object-cover rounded-xl" />
-                    <span className="absolute left-2 bottom-2 inline-block px-2.5 py-1 text-[10px] font-semibold rounded-full text-white bg-gradient-to-r from-[#00B2FF] to-[#0078FF]">PRESS RELEASE</span>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-base font-semibold text-gray-800 mt-2 hover:text-[#00B2FF] cursor-pointer">
-                      Zoom’s earliest investors are betting millions on a better Zoom for schools
-                    </h4>
-                    <p className="text-gray-500 text-xs mt-2 leading-relaxed line-clamp-2">
-                      Zoom was never created to be a consumer product. Nonetheless, this investment aims to bridge the gap.
-                    </p>
-                  </div>
-                </div>
-              </article>
-
-              {/* Small card B */}
-              <article className="bg-white rounded-2xl overflow-hidden shadow hover:shadow-lg transition-all duration-300">
-                <div className="flex gap-4 p-6">
-                  <div className="relative">
-                    <img src="/img/h11.png" alt="news 3" className="w-32 h-24 object-cover rounded-xl" />
-                    <span className="absolute left-2 bottom-2 inline-block px-2.5 py-1 text-[10px] font-semibold rounded-full text-white bg-gradient-to-r from-[#00B2FF] to-[#0078FF]">NEWS</span>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-base font-semibold text-gray-800 mt-2 hover:text-[#00B2FF] cursor-pointer">
-                      Former Blackboard CEO raises $16M to bring LMS features to Zoom classrooms
-                    </h4>
-                    <p className="text-gray-500 text-xs mt-2 leading-relaxed line-clamp-2">
-                      New funding powers deeper integrations and classroom tools to make remote learning more effective.
-                    </p>
-                  </div>
-                </div>
-              </article>
-
-              {/* Small card C */}
-              <article className="bg-white rounded-2xl overflow-hidden shadow hover:shadow-lg transition-all duration-300">
-                <div className="flex gap-4 p-6">
-                  <div className="relative">
-                    <img src="/img/h12.png" alt="news 4" className="w-32 h-24 object-cover rounded-xl" />
-                    <span className="absolute left-2 bottom-2 inline-block px-2.5 py-1 text-[10px] font-semibold rounded-full text-white bg-gradient-to-r from-[#00B2FF] to-[#0078FF]">NEWS</span>
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-base font-semibold text-gray-800 mt-2 hover:text-[#00B2FF] cursor-pointer">
-                      New product updates bring better analytics for classrooms
-                    </h4>
-                    <p className="text-gray-500 text-xs mt-2 leading-relaxed line-clamp-2">
-                      A fresh set of features arrives, focusing on insights and engagement improvements.
-                    </p>
-                  </div>
-                </div>
-              </article>
+              {loading
+                ? Array.from({ length: 3 }).map((_, index) => (
+                    <article
+                      key={`news-placeholder-${index}`}
+                      className="bg-white rounded-2xl overflow-hidden shadow transition-all duration-300"
+                    >
+                      <div className="flex gap-4 p-6">
+                        <div className="relative">
+                          <div className="w-32 h-24 rounded-xl bg-gray-200 animate-pulse" />
+                          <span className="absolute left-2 bottom-2 inline-block px-2.5 py-1 text-[10px] font-semibold rounded-full text-white bg-gradient-to-r from-[#00B2FF] to-[#0078FF]">
+                            Loading
+                          </span>
+                        </div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 w-3/4 bg-gray-200 rounded-full animate-pulse" />
+                          <div className="h-3 w-full bg-gray-200 rounded-full animate-pulse" />
+                          <div className="h-3 w-5/6 bg-gray-200 rounded-full animate-pulse" />
+                        </div>
+                      </div>
+                    </article>
+                  ))
+                : secondaryBlogs.length > 0
+                  ? secondaryBlogs.map((blog) => (
+                      <article
+                        key={blog._id}
+                        className="bg-white rounded-2xl overflow-hidden shadow hover:shadow-lg transition-all duration-300"
+                      >
+                        <div className="flex gap-4 p-6">
+                          <div className="relative">
+                            <img
+                              src={blog.coverImage || blog.categoryImage || FALLBACK_SECONDARY_IMAGE}
+                              alt={blog.title}
+                              className="w-32 h-24 object-cover rounded-xl"
+                              onError={(event) => {
+                                event.currentTarget.src = FALLBACK_SECONDARY_IMAGE;
+                              }}
+                            />
+                            <span className="absolute left-2 bottom-2 inline-block px-2.5 py-1 text-[10px] font-semibold rounded-full text-white bg-gradient-to-r from-[#00B2FF] to-[#0078FF]">
+                              {(blog.category || "News").toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-base font-semibold text-gray-800 mt-2 hover:text-[#00B2FF] cursor-pointer">
+                              {blog.title}
+                            </h4>
+                            <p className="text-gray-500 text-xs mt-2 leading-relaxed line-clamp-2">
+                              {createExcerpt(blog) || "Stay tuned for more updates and detailed stories from our blog."}
+                            </p>
+                            <Link
+                              to={blog.slug ? `/blog/${blog.slug}` : `/blog/${blog._id}`}
+                              className="inline-flex items-center gap-2 text-xs font-medium text-[#00B2FF] mt-3 hover:underline"
+                            >
+                              Read more <ArrowRight />
+                            </Link>
+                          </div>
+                        </div>
+                      </article>
+                    ))
+                  : (
+                      <article className="bg-white rounded-2xl overflow-hidden shadow transition-all duration-300">
+                        <div className="flex gap-4 p-6">
+                          <div className="relative">
+                            <img
+                              src={FALLBACK_SECONDARY_IMAGE}
+                              alt="Blog placeholder"
+                              className="w-32 h-24 object-cover rounded-xl"
+                            />
+                            <span className="absolute left-2 bottom-2 inline-block px-2.5 py-1 text-[10px] font-semibold rounded-full text-white bg-gradient-to-r from-[#00B2FF] to-[#0078FF]">
+                              NEWS
+                            </span>
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-base font-semibold text-gray-800 mt-2">
+                              Publish a blog to showcase it here
+                            </h4>
+                            <p className="text-gray-500 text-xs mt-2 leading-relaxed line-clamp-2">
+                              Once new posts go live, they will appear automatically in this section.
+                            </p>
+                          </div>
+                        </div>
+                      </article>
+                    )}
             </div>
           </div>
         </div>

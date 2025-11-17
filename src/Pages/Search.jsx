@@ -60,7 +60,7 @@ const SiteHeaderAndSearch = () => {
       {/* Second Section: Courses Grid */}
       <CoursesGridSection />
 
-      {/* Third Section: Learning Platform (hero + recommended) */}
+      {/* Third Section: Learning Platform (hero only) */}
       <LearningPlatformSection />
 
       {/* Fourth Section: Creators */}
