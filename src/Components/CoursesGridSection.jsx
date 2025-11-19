@@ -1,9 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchCourses } from "../utils/api.js";
 
-const CoursesGridSection = () => {
+const matchesSearch = (course, query) => {
+  if (!query) return true;
+  const searchableChunks = [
+    course.title,
+    course.description,
+    course.category,
+    course.level,
+    course.duration,
+    typeof course.price !== "undefined" ? String(course.price) : "",
+    Array.isArray(course.whatYoullLearn) ? course.whatYoullLearn.join(" ") : "",
+    Array.isArray(course.requirements) ? course.requirements.join(" ") : "",
+    course.createdBy?.name,
+    course.createdBy?.email,
+  ];
+
+  return searchableChunks.some((chunk) => {
+    if (typeof chunk !== "string") return false;
+    return chunk.toLowerCase().includes(query);
+  });
+};
+
+const CoursesGridSection = ({ searchTerm = "", onClearSearch }) => {
   const [courses, setCourses] = useState([]);
+  const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -23,8 +45,8 @@ const CoursesGridSection = () => {
         const incoming = Array.isArray(data?.courses) ? data.courses.filter(Boolean) : [];
         const unique = Array.from(new Map(incoming.map((course) => [course._id || course.id, course])).values());
         const shuffled = shuffleCourses(unique);
-        const list = shuffled.slice(0, Math.min(8, shuffled.length));
-        setCourses(list);
+        setCourses(unique);
+        setRecommended(shuffled.slice(0, Math.min(8, shuffled.length)));
       } catch (err) {
         setError(err.message || "Unable to load courses");
       } finally {
@@ -34,6 +56,27 @@ const CoursesGridSection = () => {
 
     loadCourses();
   }, []);
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const isSearching = normalizedSearch.length > 0;
+
+  const coursesToDisplay = useMemo(() => {
+    if (isSearching) {
+      const filtered = courses.filter((course) => matchesSearch(course, normalizedSearch));
+      return filtered.sort((a, b) => {
+        const dateA = new Date(a.updatedAt || a.createdAt || 0).getTime();
+        const dateB = new Date(b.updatedAt || b.createdAt || 0).getTime();
+        return dateB - dateA;
+      });
+    }
+
+    return recommended;
+  }, [courses, isSearching, normalizedSearch, recommended]);
+
+  const headingLabel = isSearching ? "Search results" : "Recommended for you";
+  const headingDescription = isSearching
+    ? `${coursesToDisplay.length} ${coursesToDisplay.length === 1 ? "course" : "courses"} found for “${searchTerm}”`
+    : null;
 
   const renderPrice = (priceValue) => {
     const current = Number(priceValue);
@@ -66,15 +109,30 @@ const CoursesGridSection = () => {
       aria-label="Courses"
     >
       <div className="mx-auto max-w-7xl px-6 py-12 md:py-14 lg:py-16">
-        <div className="mb-8 flex items-center justify-between md:mb-12">
-          <div>
+        <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between md:mb-12">
+          <div className="space-y-1">
             <h2 className="text-xl md:text-2xl font-bold leading-tight text-[#1E2B4A]">
-              Recommended for you
+              {headingLabel}
             </h2>
+            {headingDescription && (
+              <p className="text-sm text-gray-500">{headingDescription}</p>
+            )}
           </div>
-          <Link to="/courses" className="text-sky-500 text-sm hover:underline">
-            See all
-          </Link>
+          {isSearching ? (
+            onClearSearch && (
+              <button
+                type="button"
+                onClick={onClearSearch}
+                className="text-sm font-semibold text-teal-600 hover:text-teal-700 transition-colors"
+              >
+                Clear search
+              </button>
+            )
+          ) : (
+            <Link to="/courses" className="text-sky-500 text-sm hover:underline">
+              See all
+            </Link>
+          )}
         </div>
 
         {loading ? (
@@ -89,9 +147,13 @@ const CoursesGridSection = () => {
           <div className="rounded-2xl bg-white py-10 text-center text-sm text-gray-500 shadow">
             Courses will appear here soon.
           </div>
+        ) : isSearching && coursesToDisplay.length === 0 ? (
+          <div className="rounded-2xl bg-white py-10 text-center text-sm text-gray-500 shadow">
+            No courses match “{searchTerm}”. Try a different keyword or check back later.
+          </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:gap-7 md:grid-cols-2 lg:grid-cols-4">
-            {courses.map((course) => {
+            {coursesToDisplay.map((course) => {
               const priceInfo = renderPrice(course.price);
               const instructorName = course.createdBy?.name || course.createdBy?.email || "Team";
               const durationLabel = formatDuration(course.duration);
