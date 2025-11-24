@@ -49,7 +49,7 @@ const CourseLanding = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
+        <Navbar />
       <main className="flex-1">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <Link
@@ -66,7 +66,7 @@ const CourseLanding = () => {
           ) : error ? (
             <div className="mt-10 rounded-3xl border border-red-200 bg-red-50 px-6 py-10 text-center text-red-600">
               {error}
-            </div>
+                </div>
           ) : (
             <div className="mt-8 bg-white rounded-3xl shadow-lg overflow-hidden">
               <div className="relative h-56 bg-gray-100">
@@ -77,7 +77,7 @@ const CourseLanding = () => {
                     Course preview
                   </div>
                 )}
-              </div>
+                      </div>
 
               <div className="px-8 py-10 space-y-10">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
@@ -100,16 +100,16 @@ const CourseLanding = () => {
                     </div>
                   </div>
                   <div className="flex flex-col gap-3">
-                    <button
+                <button
                       onClick={handleAddToCart}
                       disabled={isInCart(course._id)}
                       className="inline-flex items-center justify-center gap-2 rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       <ShoppingCart className="h-4 w-4" />
                       {isInCart(course._id) ? 'In cart' : 'Add to cart'}
-                    </button>
-                  </div>
-                </div>
+                </button>
+            </div>
+          </div>
 
                 {course?.videoUrl && (
                   <div className="space-y-4">
@@ -135,7 +135,7 @@ const CourseLanding = () => {
                         This course equips you with practical skills and real-world assignments tailored to build confidence and deliver measurable results.
                       </p>
                     )}
-                  </div>
+            </div>
                   <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Requirements</h3>
                     {requirementsList.length > 0 ? (
@@ -149,10 +149,10 @@ const CourseLanding = () => {
                         Basic familiarity with the subject matter helps, but the lessons are designed to guide you from foundational concepts to applied techniques without assuming prior expertise.
                       </p>
                     )}
-                  </div>
-                </div>
-              </div>
             </div>
+          </div>
+        </div>
+      </div>
           )}
         </div>
       </main>

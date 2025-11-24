@@ -552,7 +552,7 @@ const LearningSection = () => {
         type="button"
                   onClick={() => setShowAll((prev) => !prev)}
                   className="inline-flex items-center rounded-full bg-gradient-to-r from-[#29c3c1] to-[#1eb2a6] px-5 py-2 text-sm font-semibold text-white shadow-lg transition-transform hover:scale-105"
-                >
+            >
                   {showAll ? "Show fewer" : `See more (${courses.length - 3})`}
             </button>
           </div>
@@ -711,7 +711,7 @@ const LearningSection = () => {
                       to={`/course/${course._id || course.id}`}
                       key={key}
                       className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 p-4 md:p-5 w-72 md:w-[19rem] flex-shrink-0"
-                    >
+                >
                   <div className="w-full h-44 overflow-hidden rounded-xl mb-4">
                     <img
                           src={courseImage}

@@ -1,10 +1,90 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Navbar from '../Components/Navbar.jsx'
 import FooterSection from '../Components/FooterSection.jsx'
+import { fetchCourses } from '../utils/api.js'
 
 const Meeting = () => {
   const [activeTab, setActiveTab] = useState('1 hour')
   const [expandedSections, setExpandedSections] = useState(['Get Started'])
+  const [mainImageSrc, setMainImageSrc] = useState('/img/h4.jpg')
+  const [participantImages, setParticipantImages] = useState([
+    '/img/profilephoto.png',
+    '/img/profilephoto.png',
+    '/img/profilephoto.png'
+  ])
+  const [bookRecommendations, setBookRecommendations] = useState([
+    {
+      id: 'fallback-1',
+      title: 'All Benefits of PLUS',
+      price: '$24',
+      image: '/img/book1.jpg'
+    },
+    {
+      id: 'fallback-2',
+      title: 'All Benefits of PLUS',
+      price: '$24',
+      image: '/img/book1.jpg'
+    }
+  ])
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadMediaContent = async () => {
+      try {
+        const data = await fetchCourses()
+        const courses = Array.isArray(data?.courses) ? data.courses.filter(Boolean) : []
+
+        if (!isMounted || courses.length === 0) return
+
+        const normalizedCourses = courses.map((course, index) => ({
+          id: course._id || course.id || `course-${index}`,
+          title: course.title || 'Featured Course',
+          price: Number.isFinite(Number(course.price)) && Number(course.price) > 0
+            ? `$${Number(course.price).toFixed(2)}`
+            : 'Free',
+          image:
+            course.imageUrl ||
+            course.thumbnail ||
+            course.coverImage ||
+            course.bannerImage ||
+            '/img/h4.jpg'
+        }))
+
+        const [heroCourse, ...restCourses] = normalizedCourses
+        if (heroCourse?.image) {
+          setMainImageSrc(heroCourse.image)
+        }
+
+        const participantSlice = restCourses.slice(0, 3)
+        if (participantSlice.length > 0) {
+          setParticipantImages(
+            participantSlice.map((course) => course.image || '/img/profilephoto.png')
+          )
+        }
+
+        const recommendations = normalizedCourses.slice(0, 2)
+        if (recommendations.length > 0) {
+          setBookRecommendations(recommendations)
+        }
+      } catch (error) {
+        console.error('Failed to load meeting media content:', error)
+      }
+    }
+
+    loadMediaContent()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const displayedParticipantImages = useMemo(() => {
+    if (participantImages.length >= 3) {
+      return participantImages.slice(0, 3)
+    }
+    return [...participantImages, ...Array(3 - participantImages.length).fill('/img/profilephoto.png')]
+  }, [participantImages])
 
   const toggleSection = (section) => {
     setExpandedSections(prev => 
@@ -40,7 +120,7 @@ const Meeting = () => {
             {/* Main Video Area */}
             <div className="relative bg-white rounded-2xl shadow-lg overflow-hidden mb-4">
               <img 
-                src="/img/h4.jpg" 
+                src={mainImageSrc} 
                 alt="Main speaker" 
                 className="w-full h-80 object-cover"
                 onError={(e) => { e.target.src = '/img/profilephoto.png' }}
@@ -48,7 +128,7 @@ const Meeting = () => {
               
               {/* Participant Side Panel */}
               <div className="absolute right-4 top-4 space-y-2">
-                {['/img/profilephoto.png', '/img/profilephoto.png', '/img/profilephoto.png'].map((img, i) => (
+                {displayedParticipantImages.map((img, i) => (
                   <div key={i} className="w-16 h-16 rounded-xl overflow-hidden border-2 border-white shadow-md">
                     <img src={img} alt={`Participant ${i+1}`} className="w-full h-full object-cover" />
                   </div>
@@ -175,16 +255,16 @@ const Meeting = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  {[1, 2].map((i) => (
-                    <div key={i} className="bg-gray-50 rounded-xl p-3 shadow-sm">
+                  {bookRecommendations.map((book) => (
+                    <div key={book.id} className="bg-gray-50 rounded-xl p-3 shadow-sm">
                       <img 
-                        src="/img/book1.jpg" 
-                        alt="Book cover" 
+                        src={book.image} 
+                        alt={book.title} 
                         className="w-full h-20 object-cover rounded-lg mb-2"
                         onError={(e) => { e.target.src = '/img/profilephoto.png' }}
                       />
-                      <h4 className="text-sm font-medium text-gray-900 mb-1">All Benefits of PLUS</h4>
-                      <p className="text-sm font-bold text-gray-900">$24</p>
+                      <h4 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2">{book.title}</h4>
+                      <p className="text-sm font-bold text-gray-900">{book.price}</p>
                     </div>
                   ))}
                 </div>

@@ -1,7 +1,11 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Navbar from "../Components/Navbar.jsx";
 import FooterSection from "../Components/FooterSection.jsx";
 import { Target, UsersRound, Globe2, Award, HeartHandshake, GraduationCap } from "lucide-react";
+import { fetchCourses } from "../utils/api.js";
+import man1 from "../assets/man1.jpg";
+import man2 from "../assets/man2.jpg";
+import man3 from "../assets/man3.jpg";
 
 const stats = [
   { label: "Learners served", value: "120K+" },
@@ -33,7 +37,7 @@ const values = [
   },
 ];
 
-const leaders = [
+const fallbackLeaders = [
   {
     name: "Amina Patel",
     role: "Chief Learning Officer",
@@ -54,7 +58,108 @@ const leaders = [
   },
 ];
 
+const cardImages = [man1, man2, man3];
+
 const About = () => {
+  const [heroImage, setHeroImage] = useState("/img/h4.jpg");
+  const [teamMembers, setTeamMembers] = useState(fallbackLeaders);
+  const [teamBackground, setTeamBackground] = useState("/img/h4.jpg");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const truncate = (text, maxLength = 150) => {
+      if (!text) return "Experienced mentor guiding learner success across cohorts.";
+      if (text.length <= maxLength) return text;
+      return `${text.slice(0, maxLength - 1)}…`;
+    };
+
+    const loadAboutMedia = async () => {
+      try {
+        const data = await fetchCourses();
+        const courses = Array.isArray(data?.courses) ? data.courses.filter(Boolean) : [];
+
+        if (!isMounted || courses.length === 0) return;
+
+        const normalizedCourses = courses.map((course, index) => ({
+          id: course._id || course.id || `course-${index}`,
+          title: course.title || "Featured Course",
+          category: course.category || "Course Lead",
+          description: course.description || "",
+          image:
+            course.imageUrl ||
+            course.thumbnail ||
+            course.coverImage ||
+            course.bannerImage ||
+            "/img/h4.jpg",
+          instructor: {
+            name:
+              course.instructorName ||
+              course.createdBy?.name ||
+              course.createdBy?.fullName ||
+              course.createdBy?.email ||
+              "",
+            avatar:
+              course.instructorImage ||
+              course.createdBy?.avatar ||
+              course.createdBy?.photo ||
+              course.createdBy?.image ||
+              "",
+          },
+        }));
+
+        const featuredCourse = normalizedCourses[0];
+        if (featuredCourse?.image) {
+          setHeroImage(featuredCourse.image);
+        }
+
+        const creatorsMap = new Map();
+        normalizedCourses.forEach((courseItem) => {
+          const creatorName = courseItem.instructor.name;
+          if (!creatorName) return;
+          if (!creatorsMap.has(creatorName)) {
+            creatorsMap.set(creatorName, {
+              name: creatorName,
+              role: courseItem.category || "Course Lead",
+              bio: truncate(courseItem.description),
+              avatar: courseItem.instructor.avatar || courseItem.image || "/img/profilephoto.png",
+            });
+          }
+        });
+
+        const supportingCourse = normalizedCourses.find((courseItem, index) => index > 0 && courseItem.image);
+        if (supportingCourse?.image) {
+          setTeamBackground(supportingCourse.image);
+        }
+
+        const dynamicLeaders = Array.from(creatorsMap.values()).slice(0, 3);
+        if (dynamicLeaders.length > 0) {
+          setTeamMembers(dynamicLeaders);
+        }
+      } catch (error) {
+        console.error("Failed to load About page media:", error);
+      }
+    };
+
+    loadAboutMedia();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const displayedTeamMembers = useMemo(() => {
+    if (!Array.isArray(teamMembers) || teamMembers.length === 0) {
+      return fallbackLeaders;
+    }
+
+    if (teamMembers.length >= 3) {
+      return teamMembers.slice(0, 3);
+    }
+
+    return [...teamMembers, ...fallbackLeaders].slice(0, 3);
+  }, [teamMembers]);
+
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       <Navbar variant="dark" />
@@ -62,6 +167,16 @@ const About = () => {
       <main className="flex-1">
         {/* Hero */}
         <section className="relative overflow-hidden bg-gradient-to-br from-[#E6FBFF] via-white to-[#F8F5FF]">
+          <div className="absolute inset-0 pointer-events-none">
+            <img
+              src={heroImage}
+              alt="Featured learning session"
+              className="h-full w-full object-cover opacity-10"
+              onError={(e) => {
+                e.currentTarget.src = "/img/h4.jpg";
+              }}
+            />
+          </div>
           <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-14 py-16 lg:py-24 grid gap-12 lg:grid-cols-[1.1fr_0.9fr] items-center">
             <div>
               <span className="inline-flex items-center rounded-full bg-emerald-100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-emerald-600">
@@ -157,8 +272,19 @@ const About = () => {
         </section>
 
         {/* Team */}
-        <section className="max-w-6xl mx-auto px-6 sm:px-10 lg:px-14 py-16 lg:py-20">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-10">
+        <section className="relative overflow-hidden py-16 lg:py-20">
+          <div className="absolute inset-0 pointer-events-none">
+            <img
+              src={teamBackground}
+              alt="Team collaboration"
+              className="h-full w-full object-cover opacity-10"
+              onError={(e) => {
+                e.currentTarget.src = "/img/h4.jpg";
+              }}
+            />
+          </div>
+          <div className="relative max-w-6xl mx-auto px-6 sm:px-10 lg:px-14">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-10">
             <div>
               <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900">Leadership you can trust</h2>
               <p className="mt-3 text-base text-gray-600 max-w-xl">
@@ -172,26 +298,31 @@ const About = () => {
               Meet with us
             </a>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {leaders.map((leader) => (
-              <div key={leader.name} className="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition">
-                <div className="h-48 w-full overflow-hidden rounded-t-2xl">
-                  <img
-                    src={leader.avatar}
-                    alt={leader.name}
-                    className="h-full w-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = "/img/profilephoto.png";
-                    }}
-                  />
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {displayedTeamMembers.map((leader, index) => {
+              const fallbackImage = cardImages[index] || "/img/profilephoto.png";
+              const avatarSrc = cardImages[index] || leader.avatar || "/img/profilephoto.png";
+              return (
+                <div key={leader.name} className="rounded-2xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition">
+                  <div className="h-48 w-full overflow-hidden rounded-t-2xl">
+                    <img
+                      src={avatarSrc}
+                      alt={leader.name}
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.src = fallbackImage;
+                      }}
+                    />
+                  </div>
+                  <div className="p-6 space-y-2">
+                    <h3 className="text-lg font-semibold text-gray-900">{leader.name}</h3>
+                    <p className="text-sm font-medium text-emerald-600">{leader.role}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">{leader.bio}</p>
+                  </div>
                 </div>
-                <div className="p-6 space-y-2">
-                  <h3 className="text-lg font-semibold text-gray-900">{leader.name}</h3>
-                  <p className="text-sm font-medium text-emerald-600">{leader.role}</p>
-                  <p className="text-sm text-gray-600 leading-relaxed">{leader.bio}</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
+          </div>
           </div>
         </section>
 
