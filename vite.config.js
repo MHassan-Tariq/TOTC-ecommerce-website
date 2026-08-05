@@ -20,7 +20,7 @@ export default defineConfig({
     proxy: {
       // Proxy API requests to backend during development
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:9880',
         changeOrigin: true,
       }
     }
